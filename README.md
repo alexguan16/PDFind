@@ -1,0 +1,1 @@
+extension adding find menu to PDF.JS
