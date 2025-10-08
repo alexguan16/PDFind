@@ -1,41 +1,47 @@
 :root {
 	--findMenu-width: 200px;
 }
+/*
 .findIcon::before {
 	-webkit-mask-image: var(--toolbarButton-search-icon);
 	mask-image: var(--toolbarButton-search-icon);
 }
-#findMenu {
-	width: var(--findMenu-width);
-	right: 0px;
-	position: absolute;
-	height: calc(100% - var(--toolbar-height));
-	inset-block: var(--toolbar-height)
+*/
+#findSpacer {
+	height: 6px;
 }
 #findList {
 	overflow-y: auto;
+	overflow-x: hidden;
 	width: 100%;
-	height: calc(100% - var(--toolbar-height));
 }
 .findItem {
 	cursor: pointer;
-	width: calc(var(--findMenu-width) - 30px);
-	height: 2.8em;
+/*	width: calc(var(--findMenu-width) - 30px); */
+/*	width: calc(100% - 30px); */
+/*	height: 3.2em; */
 	white-space: nowrap;
-	inset-inline-end: 18px;
-	margin: 4px;
-	padding: 2px;
-	border: 1px solid var(--treeitem-color);
+	margin: 0px 10px 6px 10px;
+	padding: 8px;
+/*	border: 1px solid var(--treeitem-color); */
+	font-size: 0.8em;
 	border-radius: 2px;
-	display: block;
+	box-shadow: 0px 0px 8px black;
+/*	display: inline-block; */
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
 }
 .findText {
 	color: var(--treeitem-color);
-	width: calc(var(--findMenu-width) - 50px);
+	height: 100%;
+	/*width: calc(100% - 30px);*/
 	white-space: wrap;
-	float: left;
 }
 .findFoot {
+	height: 100%;
 	color: var(--treeitem-color);
 	float: right;
+	font-size: 0.6em;
+	align-self: flex-end;
 }

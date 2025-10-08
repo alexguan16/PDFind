@@ -10609,6 +10609,7 @@ class PDFFindBar {
     this.updateUIState();
   }
   dispatchEvent(type, findPrev = false) {
+	console.log(this)
     this.eventBus.dispatch("find", {
       source: this,
       type,
