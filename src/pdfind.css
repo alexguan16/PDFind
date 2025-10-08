@@ -1,6 +1,13 @@
+:root {
+	--findMenu-width: 200px;
+}
+.findIcon::before {
+	-webkit-mask-image: var(--toolbarButton-search-icon);
+	mask-image: var(--toolbarButton-search-icon);
+}
 #findMenu {
-	width: 200px;
-	right:  0px;
+	width: var(--findMenu-width);
+	right: 0px;
 	position: absolute;
 	height: calc(100% - var(--toolbar-height));
 	inset-block: var(--toolbar-height)
@@ -12,6 +19,23 @@
 }
 .findItem {
 	cursor: pointer;
-	width: calc(200px - 20px);
-	height: 200px;
+	width: calc(var(--findMenu-width) - 30px);
+	height: 2.8em;
+	white-space: nowrap;
+	inset-inline-end: 18px;
+	margin: 4px;
+	padding: 2px;
+	border: 1px solid var(--treeitem-color);
+	border-radius: 2px;
+	display: block;
+}
+.findText {
+	color: var(--treeitem-color);
+	width: calc(var(--findMenu-width) - 50px);
+	white-space: wrap;
+	float: left;
+}
+.findFoot {
+	color: var(--treeitem-color);
+	float: right;
 }
