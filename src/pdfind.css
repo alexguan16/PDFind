@@ -1,12 +1,3 @@
-:root {
-	--findMenu-width: 200px;
-}
-/*
-.findIcon::before {
-	-webkit-mask-image: var(--toolbarButton-search-icon);
-	mask-image: var(--toolbarButton-search-icon);
-}
-*/
 #findSpacer {
 	height: 6px;
 }
@@ -17,25 +8,22 @@
 }
 .findItem {
 	cursor: pointer;
-/*	width: calc(var(--findMenu-width) - 30px); */
-/*	width: calc(100% - 30px); */
-/*	height: 3.2em; */
 	white-space: nowrap;
 	margin: 0px 10px 6px 10px;
 	padding: 8px;
-/*	border: 1px solid var(--treeitem-color); */
 	font-size: 0.8em;
 	border-radius: 2px;
-	box-shadow: 0px 0px 8px black;
-/*	display: inline-block; */
+	box-shadow: 0px 0px 8px grey;
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
 }
+:where(html:not(.is-light)) .findItem {
+	box-shadow: 0px 0px 8px black;
+}
 .findText {
 	color: var(--treeitem-color);
 	height: 100%;
-	/*width: calc(100% - 30px);*/
 	white-space: wrap;
 }
 .findFoot {
@@ -44,4 +32,7 @@
 	float: right;
 	font-size: 0.6em;
 	align-self: flex-end;
+}
+.findSelected {
+	background-color: grey;
 }

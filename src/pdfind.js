@@ -22,29 +22,41 @@ findSpacer.id = "findSpacer";
 
 findList = null;
 findButton = null;
+currentItem = null;
+findItemClicked = false;
+
+checkInView = function(v) {
+	const item = v.getBoundingClientRect();
+	return (
+		item.top >= 0
+		&& item.bottom <= (
+			window.innerHeight
+			|| document.documentElement.clientHeight)
+		);
+};
+
+resetFindList = function() {
+	findList.innerHTML = "";
+	findList.append(findSpacer);
+	currentItem = null;
+};
 
 setup = function() {
 	app = window.PDFViewerApplication;
 	findBar = app.findBar;
 	findController = app.findController;
 
-	console.log(window.PDFViewerApplication.pdfDocument);
 	find = document.getElementById("viewFind");
 	document.getElementById("toolbarViewerLeft").append(find);
-
 
 	findbar = document.getElementById("findbar");
 	findbar.style.insetInlineStart = find.offsetLeft + 'px';
 
 	findButton = find.cloneNode(true);
-	//findButton.id = "listFind";
 	findButton.classList.add("findIcon");
 	findButton.setAttribute("aria-checked", false);
-	document.getElementById("toolbarSidebarLeft").append(findButton);
-	//find.setAttribute("id", "listFind");
-
 	findButton.addEventListener("click", findMenu);
-	//find.style.visibility = 'hidden';
+	document.getElementById("toolbarSidebarLeft").append(findButton);
 
 	findList = document.createElement('div');
 	findList.id = "findList";
@@ -62,33 +74,76 @@ setup = function() {
 			pageIndex: -1
 		});
 	});
-
 	find.addEventListener("click", function() {
-		if(findButton.getAttribute("aria-checked")) {
+		if(findButton.getAttribute("aria-checked") === "true") {
 			findController._highlightMatches = true;
 			app.eventBus.dispatch("updatetextlayermatches", {
 				source: findController,
 				pageIndex: -1
 			});
 		}
-/*
-		app.eventBus.dispatch("find", {
-			query: findBar.findField.value,
-			caseSensitive: findBar.caseSensitive.checked,
-			highlightAll: findBar.highlightAll.checked,
-			findPrevious: false,
-			matchDiactrics: findBar.matchDiacritics.checked,
-		});
-*/
+		if(find.classList.contains("toggled")) {
+			app.eventBus.dispatch("find", {
+				query: findBar.findField.value,
+				caseSensitive: findBar.caseSensitive.checked,
+				highlightAll: findBar.highlightAll.checked,
+				findPrevious: false,
+				matchDiactrics: findBar.matchDiacritics.checked,
+				click: true,
+			});
+		}
+
+		findbar = document.getElementById("findbar");
+		findbar.style.insetInlineStart = find.offsetLeft + 'px';
 	});
 
 	app.eventBus.on("find", function(a) {
+		if(a.click) return;
 		if(a.type !== "highlightallchange" && a.type !== "again") {
-			findList.innerHTML = "";
-			findList.append(findSpacer);
+			resetFindList();
 		}
 	});
-	
+
+	app.eventBus.on("updatefindmatchescount", function(a) {
+		if(a.matchesCount.current === 0) return;
+		item = findList.children[a.matchesCount.current];
+		if(item === currentItem) return;
+
+		currentItem?.classList.toggle("findSelected", false);
+		currentItem = item;
+		currentItem?.classList.toggle("findSelected", true);
+		console.log("scroll", currentItem);
+		currentItem?.scrollIntoView();
+	});
+
+	app.eventBus.on("updatefindcontrolstate", (a) => {
+		if(a.state !== 0 && a.state !== 2) return;
+
+		data = JSON.parse(findbar.querySelector("#findResultsCount").getAttribute("data-l10n-args"));
+		if(data === null || data.current === 0) return;
+
+		item = findList.children[data.current];
+		if(currentItem === item) return;
+
+		currentItem?.classList.toggle("findSelected", false);
+		currentItem = item;
+		currentItem?.classList.toggle("findSelected", true);
+
+		if(findItemClicked === true) {
+			findItemClicked = false;
+			return;
+		}
+		if(currentItem === undefined) return;	
+
+		console.log(currentItem);
+		if(!checkInView(currentItem)) currentItem.scrollIntoView({block: "nearest"});
+	});
+
+	app.eventBus.on("updateviewarea", () => {
+		findbar = document.getElementById("findbar");
+		findbar.style.insetInlineStart = find.offsetLeft + 'px';
+	});
+
 	if(typeof findController._match === 'undefined') {
 		findController._match = findController.match;
 		findController.match = function(query, content, pageIndex) {
@@ -98,7 +153,6 @@ setup = function() {
 			return matches;
 		}
 	}
-
 /*
 	if(typeof app.eventBus._dispatch === 'undefined') {
 		app.eventBus._dispatch = app.eventBus.dispatch;
@@ -124,16 +178,30 @@ findMenu = function() {
 	findList.classList.toggle("hidden", false);
 	[].forEach.call(findList.children, (e) => e.classList.toggle("hidden", false));
 
+	app.eventBus.dispatch("find", {
+		query: findBar.findField.value,
+		caseSensitive: findBar.caseSensitive.checked,
+		highlightAll: findBar.highlightAll.checked,
+		findPrevious: false,
+		matchDiactrics: findBar.matchDiacritics.checked,
+		click: true,
+	});
+
 	findController._highlightMatches = findBar.highlightAll.checked;
 	app.eventBus.dispatch("updatetextlayermatches", {
 		source: findController,
 		pageIndex: -1
 	});
+	currentItem?.scrollIntoView({block: "center"});
 };
 
 addFindItems = function(matches, content, pageIndex, matchIdx) {
 	tl = 30
 	matches.forEach((m, i) => {
+		tail = findList.children[findList.children.length-1];
+		if(findList.children.length !== 1 
+			&& tail.getAttribute("data-pageIdx") > pageIndex) resetFindList();
+
 		t = findController._rawQuery.length;
 		l = content.length - 1;
 		a = m.index-tl > 0 ? m.index-tl : 0;
@@ -150,13 +218,19 @@ addFindItems = function(matches, content, pageIndex, matchIdx) {
 		n = findItem.cloneNode(true);
 		n.querySelector(".findFoot").innerHTML = pageIndex;
 		n.querySelector(".findText").innerHTML = txt;
+		n.setAttribute("data-pageIdx", pageIndex);
+		n.setAttribute("data-matchIdx", matchIdx);
 
 		n.addEventListener("click", function() {
+			findItemClicked = true;
+
+			console.log(this);
+			if(this.classList.contains("findSelected")) return;
 			page = app.pdfViewer._pages[pageIndex];
 			app.eventBus.on("textlayerrendered", function(p) {
 				match = page._textHighlighter.matches[i];
 				page._textHighlighter.textDivs[match.begin.divIdx].scrollIntoView({block: "center"});
-			}.bind(page, i), {once: true});
+			}.bind(this, page, i), {once: true});
 			page.div.scrollIntoView();
 
 			findController._selected = findController._offset = {
@@ -172,7 +246,7 @@ addFindItems = function(matches, content, pageIndex, matchIdx) {
 
 			app.eventBus.dispatch('updatefindcontrolstate', {
 				source: findController,
-				state: findController.state,
+				state: 0,
 				previous: false,
 				entireWord: findController.state.entireWord,
 				matchesCount: {
@@ -181,7 +255,7 @@ addFindItems = function(matches, content, pageIndex, matchIdx) {
 				},
 				rawQuery: findController._rawQuery
 			});
-		}.bind(i, pageIndex, matchIdx));
+		}.bind(n, i, pageIndex, matchIdx));
 
 		n.addEventListener("mouseover", function() {
 			this.style.backgroundColor = "var(--treeitem-selected-bg-color)";
@@ -193,7 +267,7 @@ addFindItems = function(matches, content, pageIndex, matchIdx) {
 		n.classList.toggle("hidden", findButton.getAttribute("aria-checked") === "false");
 		findList.append(n)
 	});
-}
+};
 
 l = () => {
 	if(typeof window.PDFViewerApplication === 'undefined'

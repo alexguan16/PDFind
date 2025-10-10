@@ -4,13 +4,11 @@
   "name": "PDF Viewer",
   "version": "4.6.129",
   "description": "Uses HTML5 to display PDF files directly in the browser.",
-  /*
   "icons": {
     "128": "icon128.png",
     "48": "icon48.png",
     "16": "icon16.png"
   },
-  */
   "permissions": [
     "alarms",
     "declarativeNetRequestWithHostAccess",
