@@ -45,6 +45,7 @@
     {
       "resources": [
         "content/web/viewer.html",
+        "index.html",
         "http:/*",
         "https:/*",
         "file:/*",
