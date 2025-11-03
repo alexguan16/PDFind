@@ -24,6 +24,8 @@
 .findText {
 	color: var(--treeitem-color);
 	height: 100%;
+	width: 90%;
+	word-wrap: break-word;
 	white-space: wrap;
 }
 .findFoot {

@@ -1,6 +1,7 @@
 app = null;
 findBar = null;
 findController = null;
+TEXT_LENGTH = 30;
 
 findItem = document.createElement('dev');
 findItem.classList.add("findItem");
@@ -196,7 +197,7 @@ findMenu = function() {
 };
 
 addFindItems = function(matches, content, pageIndex, matchIdx) {
-	tl = 30
+	tl = TEXT_LENGTH;
 	matches.forEach((m, i) => {
 		tail = findList.children[findList.children.length-1];
 		if(findList.children.length !== 1 
